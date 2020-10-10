@@ -4,9 +4,11 @@ using System.Text;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
+using Lares.Entities;
+
 namespace Lares.Infrastructure
 {
-    public class DataContext : IdentityDbContext
+    public class DataContext : IdentityDbContext<User>
     {
         public DataContext(DbContextOptions<DataContext> options)
             : base(options)
@@ -16,15 +18,12 @@ namespace Lares.Infrastructure
         //
         // Define all datasets
         //
-
+        public DbSet<User> Users { get; set; }
         //--------------------//
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            /*
-             * modelBuilder.Entity<User>().ToTable("User");
-             */
         }
     }
 }
