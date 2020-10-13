@@ -18,7 +18,7 @@ namespace Lares.Infrastructure
         /*
          * Dataset Definitions
          */
-        public DbSet<User> Users { get; set; }
+        // public DbSet<User> Users { get; set; }
         public DbSet<Property> Property { get; set; }
         public DbSet<Asset> Assets { get; set; }
         public DbSet<WorkTask> WorkTasks { get; set; }

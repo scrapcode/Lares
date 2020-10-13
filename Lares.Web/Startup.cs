@@ -14,7 +14,8 @@ using Microsoft.Extensions.Hosting;
 
 using Lares.Infrastructure;
 using Lares.Entities;
-
+using Lares.Infrastructure.Repositories;
+using Lares.Interfaces;
 
 namespace Lares
 {
@@ -37,6 +38,11 @@ namespace Lares
                 .AddEntityFrameworkStores<DataContext>();
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddHttpContextAccessor();
+
+            // DI
+            services.AddScoped<DataContext>();
+            services.AddScoped(typeof(IRepository<>), typeof(CoreRepository<>));
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

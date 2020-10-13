@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-using Lares.Interfaces;
-
-namespace Lares.Entities
+namespace Lares.Interfaces
 {
-    public class BaseEntity : IEntity
+    public interface IEntity
     {
         public int Id { get; set; }
     }
