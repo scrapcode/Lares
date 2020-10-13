@@ -5,87 +5,81 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 
 using Lares.Entities;
-using Lares.Interfaces;
-using Lares.ViewModels;
-using System.Security.Claims;
-using Lares.Infrastructure.Repositories;
 using Lares.Infrastructure;
+using Lares.ViewModels;
 
 namespace Lares.Controllers
 {
     public class PropertyController : Controller
     {
-        private readonly IRepository<Property> _repo;
+        private readonly DataContext _context;
 
         public PropertyController(DataContext context)
         {
-            _repo = new CoreRepository<Property>(context);
+            _context = context;
         }
 
-        // GET: /property/
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Property>>> Index()
+        // GET: Property
+        public async Task<IActionResult> Index()
         {
-            var result = await _repo.GetAll();
-            List<PropertyViewModel> allProps = new List<PropertyViewModel>();
+            return View(await _context.Property.ToListAsync());
+        }
 
-            foreach (Property property in result)
+        // GET: Property/Details/5
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
             {
-                PropertyViewModel propertyVM = new PropertyViewModel
-                {
-                    Id              = property.Id, 
-                    OwnerUserId     = property.OwnerUserId,
-                    OwnerUser       = property.OwnerUser,
-                    Name            = property.Name,
-                    Description     = property.Description,
-                    Address1        = property.Address1,
-                    Address2        = property.Address2,
-                    AcquiredDate    = property.AcquiredDate
-                };
-
-                allProps.Add(propertyVM);
+                return NotFound();
             }
 
-            return View(allProps);
+            var @property = await _context.Property
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (@property == null)
+            {
+                return NotFound();
+            }
+
+            return View(@property);
         }
 
-        // GET: /property/create/
+        // GET: Property/Create
         public IActionResult Create()
         {
-            PropertyViewModel propertyVM = new PropertyViewModel();
-            propertyVM.AcquiredDate = DateTime.Now;
-            return View(propertyVM);
+            PropertyViewModel propertyViewModel = new PropertyViewModel();
+            return View(propertyViewModel);
         }
 
-        // POST: /property/create/
+        // POST: Property/Create
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate")] PropertyViewModel propertyVM)
+        public async Task<IActionResult> Create([Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate,Id")] PropertyViewModel propertyViewModel)
         {
-            if(ModelState.IsValid)
+            if (ModelState.IsValid)
             {
                 Property newProperty = new Property
                 {
-                    OwnerUserId = propertyVM.OwnerUserId,
-                    Name = propertyVM.Name,
-                    Description = propertyVM.Description,
-                    Address1 = propertyVM.Address1,
-                    Address2 = propertyVM.Address2,
-                    AcquiredDate = propertyVM.AcquiredDate
+                    Id = propertyViewModel.Id,
+                    OwnerUserId = propertyViewModel.OwnerUserId,
+                    Name = propertyViewModel.Name,
+                    Description = propertyViewModel.Description,
+                    Address1 = propertyViewModel.Address1,
+                    Address2 = propertyViewModel.Address2,
+                    AcquiredDate = propertyViewModel.AcquiredDate
                 };
 
-                await _repo.AddAsync(newProperty);
+                _context.Add(newProperty);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-
-            return View(propertyVM);
+            return View(propertyViewModel);
         }
 
-        // GET: /property/edit/[id]
+        // GET: Property/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -93,77 +87,103 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var property = await _repo.GetByIdAsync((int)id);
-
-            if (property == null)
+            var @property = await _context.Property.FindAsync(id);
+            if (@property == null)
             {
                 return NotFound();
             }
 
-            // map to the ViewModel
-            PropertyViewModel propertyVM = new PropertyViewModel
+            PropertyViewModel propertyViewModel = new PropertyViewModel
             {
-                Id = property.Id,
-                OwnerUserId = property.OwnerUserId,
-                Name = property.Name,
-                Description = property.Description,
-                Address1 = property.Address1,
-                Address2 = property.Address2,
-                AcquiredDate = property.AcquiredDate
+                Id = @property.Id,
+                OwnerUserId = @property.OwnerUserId,
+                Name = @property.Name,
+                Description = @property.Description,
+                Address1 = @property.Address1,
+                Address2 = @property.Address2,
+                AcquiredDate = @property.AcquiredDate
             };
 
-            return View(propertyVM);
+            return View(propertyViewModel);
         }
 
-        // POST: /property/edit/[id]
+        // POST: Property/Edit/5
+        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
+        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate")] PropertyViewModel propertyVM)
+        public async Task<IActionResult> Edit(int id, [Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate,Id")] PropertyViewModel propertyViewModel)
         {
-            if (id != propertyVM.Id) return NotFound();
+            if (id != propertyViewModel.Id)
+            {
+                return NotFound();
+            }
 
             if (ModelState.IsValid)
             {
-                var property = await _repo.GetByIdAsync(id);
+                Property editedProperty = await _context.Property
+                    .FirstOrDefaultAsync(p => p.Id == id);
 
-                if (property == null) return NotFound();
+                editedProperty.OwnerUserId = propertyViewModel.OwnerUserId;
+                editedProperty.Name = propertyViewModel.Name;
+                editedProperty.Description = propertyViewModel.Description;
+                editedProperty.Address1 = propertyViewModel.Address1;
+                editedProperty.Address2 = propertyViewModel.Address2;
+                editedProperty.AcquiredDate = propertyViewModel.AcquiredDate;
 
-                // Map the ViewModel back to it's Model
-                property.OwnerUserId = propertyVM.OwnerUserId;
-                property.Name = propertyVM.Name;
-                property.Description = propertyVM.Description;
-                property.Address1 = propertyVM.Address1;
-                property.Address2 = propertyVM.Address2;
-                property.AcquiredDate = propertyVM.AcquiredDate;
-
-                // Update the Property in the DB
-                await _repo.UpdateAsync(property);
-
+                try
+                {
+                    _context.Update(editedProperty);
+                    await _context.SaveChangesAsync();
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!PropertyExists(editedProperty.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
                 return RedirectToAction(nameof(Index));
             }
-
-            return View(propertyVM);
+            return View(propertyViewModel);
         }
 
-        // GET: /property/delete/[id]
+        // GET: Property/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null) return NotFound();
+            if (id == null)
+            {
+                return NotFound();
+            }
 
-            var property = await _repo.GetByIdAsync((int)id);
+            var @property = await _context.Property
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (@property == null)
+            {
+                return NotFound();
+            }
 
-            if (property == null) return NotFound();
-
-            return View(property);
+            return View(@property);
         }
 
-        // POST: /property/delete/[id]
+        // POST: Property/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _repo.DeleteAsync(id);
+            var @property = await _context.Property.FindAsync(id);
+            _context.Property.Remove(@property);
+            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
+        }
+
+        private bool PropertyExists(int id)
+        {
+            return _context.Property.Any(e => e.Id == id);
         }
     }
 }
