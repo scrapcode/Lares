@@ -6,7 +6,7 @@ namespace Lares.Entities
 {
     public class Property : BaseEntity
     {
-        public int OwnerUserId { get; set; }
+        public string OwnerUserId { get; set; }
         public virtual User OwnerUser { get; set; }
         public string Name { get; set; }
         public string Description { get; set; }

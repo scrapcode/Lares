@@ -14,7 +14,9 @@
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <div class="form-group">
                 <label asp-for="OwnerUserId" class="control-label"></label>
-                <input asp-for="OwnerUserId" class="form-control" />
+                <select asp-for="OwnerUserId" asp-items="Model.OwnerSelectList" class="form-control">
+                    <option value="">Select Owner</option>
+                </select>
                 <span asp-validation-for="OwnerUserId" class="text-danger"></span>
             </div>
             <div class="form-group">

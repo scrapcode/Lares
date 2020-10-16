@@ -1,4 +1,4 @@
-﻿@model IEnumerable<Lares.Entities.Property>
+﻿@model IEnumerable<Lares.ViewModels.PropertyViewModel>
 
 @{
     ViewData["Title"] = "Index";
@@ -13,7 +13,7 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.OwnerUserId)
+                @Html.DisplayNameFor(model => model.OwnerUserName)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Name)
@@ -37,7 +37,7 @@
 @foreach (var item in Model) {
         <tr>
             <td>
-                @Html.DisplayFor(modelItem => item.OwnerUserId)
+                @Html.DisplayFor(modelItem => item.OwnerUserName)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Name)

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Identity;
 
 using Lares.Entities;
 using Lares.Infrastructure;
@@ -15,16 +16,43 @@ namespace Lares.Controllers
     public class PropertyController : Controller
     {
         private readonly DataContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public PropertyController(DataContext context)
+        public PropertyController(DataContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Property
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Property.ToListAsync());
+            List<PropertyViewModel> propertyViewModels = new List<PropertyViewModel>();
+
+            foreach (var property in await _context.Property.ToListAsync())
+            {
+                // Fetch username for each property owner
+                var ownerUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == property.OwnerUserId);
+                string ownerUserName = ownerUser.UserName;
+
+                // Map objects to their ViewModel
+                PropertyViewModel tmpProperty = new PropertyViewModel
+                {
+                    Id = property.Id,
+                    OwnerUserId = property.OwnerUserId,
+                    OwnerUserName = ownerUserName,
+                    Name = property.Name,
+                    Description = property.Description,
+                    Address1 = property.Address1,
+                    Address2 = property.Address2,
+                    AcquiredDate = property.AcquiredDate
+                };
+
+                // Add object to the list of items
+                propertyViewModels.Add(tmpProperty);
+            }
+
+            return View(propertyViewModels);
         }
 
         // GET: Property/Details/5
@@ -49,22 +77,33 @@ namespace Lares.Controllers
         public IActionResult Create()
         {
             PropertyViewModel propertyViewModel = new PropertyViewModel();
+
+            // Populate the OwnerSelectList with a list of users.
+            var userList = _userManager.Users.Select(u => new { u.Id, u.UserName }).ToList();
+            propertyViewModel.OwnerSelectList = new SelectList(userList, "Id", "UserName");
+
+            // Set the default AcquiredDate to DateTime.Now
+            propertyViewModel.AcquiredDate = DateTime.Now;
+
             return View(propertyViewModel);
         }
 
         // POST: Property/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to, for 
-        // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate,Id")] PropertyViewModel propertyViewModel)
         {
             if (ModelState.IsValid)
             {
+                var ownerUser = _userManager.Users.FirstOrDefault(u => u.Id == propertyViewModel.OwnerUserId);
+
+                if (ownerUser == null) return NotFound();
+
                 Property newProperty = new Property
                 {
                     Id = propertyViewModel.Id,
                     OwnerUserId = propertyViewModel.OwnerUserId,
+                    OwnerUser = ownerUser,
                     Name = propertyViewModel.Name,
                     Description = propertyViewModel.Description,
                     Address1 = propertyViewModel.Address1,
