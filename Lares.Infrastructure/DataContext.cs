@@ -5,6 +5,11 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
 using Lares.Entities;
+using System.Linq;
+using Lares.Interfaces;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace Lares.Infrastructure
 {
@@ -35,6 +40,47 @@ namespace Lares.Infrastructure
             modelBuilder.Entity<TimeEntry>().ToTable("TimeEntry");
             modelBuilder.Entity<MaterialEntry>().ToTable("MaterialEntry");
             modelBuilder.Entity<Resource>().ToTable("Resource");
+        }
+
+        // OnSaveChanges Overrides
+        public override int SaveChanges()
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.Entity is ITrackable &&
+                (e.State == EntityState.Added ||
+                e.State == EntityState.Modified));
+
+            foreach (var entry in entries)
+            {
+                ((ITrackable)entry.Entity).UpdatedOn = DateTime.Now;
+
+                if (entry.State == EntityState.Added)
+                {
+                    ((ITrackable)entry.Entity).CreatedOn = DateTime.Now;
+                }    
+            }
+
+            return base.SaveChanges();
+        }
+
+        public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default(CancellationToken))
+        {
+            var entries = ChangeTracker.Entries()
+                .Where(e => e.Entity is ITrackable &&
+                (e.State == EntityState.Added ||
+                e.State == EntityState.Modified));
+
+            foreach (var entry in entries)
+            {
+                ((ITrackable)entry.Entity).UpdatedOn = DateTime.Now;
+
+                if (entry.State == EntityState.Added)
+                {
+                    ((ITrackable)entry.Entity).CreatedOn = DateTime.Now;
+                }
+            }
+
+            return await base.SaveChangesAsync(true, cancellationToken);
         }
     }
 }

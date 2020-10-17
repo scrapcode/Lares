@@ -10,23 +10,23 @@ using Lares.Infrastructure;
 
 namespace Lares.Controllers
 {
-    public class AssetController : Controller
+    public class TimeEntryController : Controller
     {
         private readonly DataContext _context;
 
-        public AssetController(DataContext context)
+        public TimeEntryController(DataContext context)
         {
             _context = context;
         }
 
-        // GET: Asset
+        // GET: TimeEntries
         public async Task<IActionResult> Index()
         {
-            var dataContext = _context.Assets.Include(a => a.Property);
+            var dataContext = _context.TimeEntries.Include(t => t.Resource).Include(t => t.WorkTask);
             return View(await dataContext.ToListAsync());
         }
 
-        // GET: Asset/Details/5
+        // GET: TimeEntries/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,42 +34,45 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets
-                .Include(a => a.Property)
+            var timeEntry = await _context.TimeEntries
+                .Include(t => t.Resource)
+                .Include(t => t.WorkTask)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (asset == null)
+            if (timeEntry == null)
             {
                 return NotFound();
             }
 
-            return View(asset);
+            return View(timeEntry);
         }
 
-        // GET: Asset/Create
+        // GET: TimeEntries/Create
         public IActionResult Create()
         {
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id");
+            ViewData["ResourceId"] = new SelectList(_context.Resources, "Id", "Id");
+            ViewData["WorkTaskId"] = new SelectList(_context.WorkTasks, "Id", "Id");
             return View();
         }
 
-        // POST: Asset/Create
+        // POST: TimeEntries/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PropertyId,Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] Asset asset)
+        public async Task<IActionResult> Create([Bind("WorkTaskId,ResourceId,DateOfWork,HoursWorked,Description,Id")] TimeEntry timeEntry)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(asset);
+                _context.Add(timeEntry);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            ViewData["ResourceId"] = new SelectList(_context.Resources, "Id", "Id", timeEntry.ResourceId);
+            ViewData["WorkTaskId"] = new SelectList(_context.WorkTasks, "Id", "Id", timeEntry.WorkTaskId);
+            return View(timeEntry);
         }
 
-        // GET: Asset/Edit/5
+        // GET: TimeEntries/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,23 +80,24 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets.FindAsync(id);
-            if (asset == null)
+            var timeEntry = await _context.TimeEntries.FindAsync(id);
+            if (timeEntry == null)
             {
                 return NotFound();
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            ViewData["ResourceId"] = new SelectList(_context.Resources, "Id", "Id", timeEntry.ResourceId);
+            ViewData["WorkTaskId"] = new SelectList(_context.WorkTasks, "Id", "Id", timeEntry.WorkTaskId);
+            return View(timeEntry);
         }
 
-        // POST: Asset/Edit/5
+        // POST: TimeEntries/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PropertyId,Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] Asset asset)
+        public async Task<IActionResult> Edit(int id, [Bind("WorkTaskId,ResourceId,DateOfWork,HoursWorked,Description,Id")] TimeEntry timeEntry)
         {
-            if (id != asset.Id)
+            if (id != timeEntry.Id)
             {
                 return NotFound();
             }
@@ -102,12 +106,12 @@ namespace Lares.Controllers
             {
                 try
                 {
-                    _context.Update(asset);
+                    _context.Update(timeEntry);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AssetExists(asset.Id))
+                    if (!TimeEntryExists(timeEntry.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +122,12 @@ namespace Lares.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            ViewData["ResourceId"] = new SelectList(_context.Resources, "Id", "Id", timeEntry.ResourceId);
+            ViewData["WorkTaskId"] = new SelectList(_context.WorkTasks, "Id", "Id", timeEntry.WorkTaskId);
+            return View(timeEntry);
         }
 
-        // GET: Asset/Delete/5
+        // GET: TimeEntries/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,31 +135,32 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets
-                .Include(a => a.Property)
+            var timeEntry = await _context.TimeEntries
+                .Include(t => t.Resource)
+                .Include(t => t.WorkTask)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (asset == null)
+            if (timeEntry == null)
             {
                 return NotFound();
             }
 
-            return View(asset);
+            return View(timeEntry);
         }
 
-        // POST: Asset/Delete/5
+        // POST: TimeEntries/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var asset = await _context.Assets.FindAsync(id);
-            _context.Assets.Remove(asset);
+            var timeEntry = await _context.TimeEntries.FindAsync(id);
+            _context.TimeEntries.Remove(timeEntry);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AssetExists(int id)
+        private bool TimeEntryExists(int id)
         {
-            return _context.Assets.Any(e => e.Id == id);
+            return _context.TimeEntries.Any(e => e.Id == id);
         }
     }
 }

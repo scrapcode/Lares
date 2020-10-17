@@ -11,5 +11,6 @@ namespace Lares.Entities
         public DateTime CreatedOn { get; set; }
         public DateTime LastLogin { get; set; }
         public virtual List<Property> Properties { get; set; }
+        public int SelectedPropertyId { get; set; }
     }
 }

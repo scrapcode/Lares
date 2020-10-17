@@ -10,23 +10,22 @@ using Lares.Infrastructure;
 
 namespace Lares.Controllers
 {
-    public class AssetController : Controller
+    public class ResourceController : Controller
     {
         private readonly DataContext _context;
 
-        public AssetController(DataContext context)
+        public ResourceController(DataContext context)
         {
             _context = context;
         }
 
-        // GET: Asset
+        // GET: Resource
         public async Task<IActionResult> Index()
         {
-            var dataContext = _context.Assets.Include(a => a.Property);
-            return View(await dataContext.ToListAsync());
+            return View(await _context.Resources.ToListAsync());
         }
 
-        // GET: Asset/Details/5
+        // GET: Resource/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -34,42 +33,39 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets
-                .Include(a => a.Property)
+            var resource = await _context.Resources
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (asset == null)
+            if (resource == null)
             {
                 return NotFound();
             }
 
-            return View(asset);
+            return View(resource);
         }
 
-        // GET: Asset/Create
+        // GET: Resource/Create
         public IActionResult Create()
         {
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id");
             return View();
         }
 
-        // POST: Asset/Create
+        // POST: Resource/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PropertyId,Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] Asset asset)
+        public async Task<IActionResult> Create([Bind("ShortCode,FirstName,LastName,OnboardDate,TerminationDate,Id")] Resource resource)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(asset);
+                _context.Add(resource);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            return View(resource);
         }
 
-        // GET: Asset/Edit/5
+        // GET: Resource/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -77,23 +73,22 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets.FindAsync(id);
-            if (asset == null)
+            var resource = await _context.Resources.FindAsync(id);
+            if (resource == null)
             {
                 return NotFound();
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            return View(resource);
         }
 
-        // POST: Asset/Edit/5
+        // POST: Resource/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to, for 
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("PropertyId,Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] Asset asset)
+        public async Task<IActionResult> Edit(int id, [Bind("ShortCode,FirstName,LastName,OnboardDate,TerminationDate,Id")] Resource resource)
         {
-            if (id != asset.Id)
+            if (id != resource.Id)
             {
                 return NotFound();
             }
@@ -102,12 +97,12 @@ namespace Lares.Controllers
             {
                 try
                 {
-                    _context.Update(asset);
+                    _context.Update(resource);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AssetExists(asset.Id))
+                    if (!ResourceExists(resource.Id))
                     {
                         return NotFound();
                     }
@@ -118,11 +113,10 @@ namespace Lares.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            return View(resource);
         }
 
-        // GET: Asset/Delete/5
+        // GET: Resource/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -130,31 +124,30 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            var asset = await _context.Assets
-                .Include(a => a.Property)
+            var resource = await _context.Resources
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (asset == null)
+            if (resource == null)
             {
                 return NotFound();
             }
 
-            return View(asset);
+            return View(resource);
         }
 
-        // POST: Asset/Delete/5
+        // POST: Resource/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var asset = await _context.Assets.FindAsync(id);
-            _context.Assets.Remove(asset);
+            var resource = await _context.Resources.FindAsync(id);
+            _context.Resources.Remove(resource);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool AssetExists(int id)
+        private bool ResourceExists(int id)
         {
-            return _context.Assets.Any(e => e.Id == id);
+            return _context.Resources.Any(e => e.Id == id);
         }
     }
 }

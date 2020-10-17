@@ -10,6 +10,9 @@ using Microsoft.AspNetCore.Identity;
 using Lares.Entities;
 using Lares.Infrastructure;
 using Lares.ViewModels;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Lares.Controllers
 {
@@ -17,19 +20,28 @@ namespace Lares.Controllers
     {
         private readonly DataContext _context;
         private readonly UserManager<User> _userManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public PropertyController(DataContext context, UserManager<User> userManager)
+        public PropertyController(DataContext context, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
             _userManager = userManager;
+            _httpContextAccessor = httpContextAccessor;
+        }
+
+        private string getCurrentUserId()
+        {
+            return _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
         }
 
         // GET: Property
         public async Task<IActionResult> Index()
         {
+            string currentUserId = getCurrentUserId();
+
             List<PropertyViewModel> propertyViewModels = new List<PropertyViewModel>();
 
-            foreach (var property in await _context.Property.ToListAsync())
+            foreach (var property in await _context.Property.Where(p => p.OwnerUserId == currentUserId).ToListAsync())
             {
                 // Fetch username for each property owner
                 var ownerUser = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == property.OwnerUserId);
@@ -40,7 +52,6 @@ namespace Lares.Controllers
                 {
                     Id = property.Id,
                     OwnerUserId = property.OwnerUserId,
-                    OwnerUserName = ownerUserName,
                     Name = property.Name,
                     Description = property.Description,
                     Address1 = property.Address1,
@@ -224,5 +235,8 @@ namespace Lares.Controllers
         {
             return _context.Property.Any(e => e.Id == id);
         }
+
+        // TODO: GET: Property/SetCurrent/[id]
+        
     }
 }

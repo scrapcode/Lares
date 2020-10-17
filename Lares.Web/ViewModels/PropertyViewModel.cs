@@ -12,10 +12,6 @@ namespace Lares.ViewModels
 
         public string OwnerUserId { get; set; }
 
-        // This is set in the controller
-        [Display(Name = "Owner")]
-        public string OwnerUserName { get; set; }
-
         // This is populated in the controller
         public SelectList OwnerSelectList { get; set; }
 

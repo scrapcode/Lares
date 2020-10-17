@@ -1,11 +1,12 @@
-﻿using System;
+﻿using Lares.Interfaces;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Lares.Entities
 {
-    public class Asset : BaseEntity
+    public class Asset : BaseEntity, ITrackable
     {
         public int PropertyId { get; set; }
         public virtual Property Property { get; set; }
@@ -15,8 +16,10 @@ namespace Lares.Entities
         public string Model { get; set; }
         public string SerialNo { get; set; }
         public DateTime AcquiredDate { get; set; }
+        public virtual List<WorkTask> Tasks { get; set; }
+
+        // Trackable
         public DateTime CreatedOn { get; set; }
         public DateTime UpdatedOn { get; set; }
-        public virtual List<WorkTask> Tasks { get; set; }
     }
 }
