@@ -1,0 +1,49 @@
+﻿@model Lares.ViewModels.DashboardViewModel
+
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="row">
+    <div class="col">
+        <h1>Dashboard</h1>
+        @if (Model.CurrentProperty == null)
+        {
+            <p>You do not have a property selected. [insert property options]</p>
+        }
+        else
+        {
+            <p>Your current property is: @Model.CurrentProperty.Name!</p>
+        }
+    </div>
+</div>
+<div class="row">
+    <div class="col-9">
+        <div class="card">
+            <div class="card-header">
+                Upcoming Tasks
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <ul>
+                        <li>[12/15/2020] <strong>HVAC Unit 1</strong> - Air filter change</li>
+                        <li>[12/30/2020] <strong>General</strong> - Take down Christmas Tree</li>
+                    </ul>
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="card">
+            <div class="card-header">
+                Quick Actions
+            </div>
+            <div class="card-body">
+                <p class="card-text">
+                    <a href="#">Add Asset</a>
+                    <a href="#">Generate Reports</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>

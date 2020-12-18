@@ -8,11 +8,11 @@
     ViewData["Title"] = "Index";
 }
 
-<h1>Index</h1>
+<h1>Properties</h1>
 
-@if (SignInManager.IsSignedIn(User))
+@if (ViewBag.Message != null)
 {
-    <h2>Welcome, @User.Identity.Name!</h2>
+    <div class="alert alert-@ViewBag.MessageType">@ViewBag.Message</div>
 }
 
 <p>

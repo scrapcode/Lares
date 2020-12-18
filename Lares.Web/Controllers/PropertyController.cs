@@ -29,15 +29,10 @@ namespace Lares.Controllers
             _httpContextAccessor = httpContextAccessor;
         }
 
-        private string getCurrentUserId()
-        {
-            return _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        }
-
         // GET: Property
         public async Task<IActionResult> Index()
         {
-            string currentUserId = getCurrentUserId();
+            string currentUserId = _userManager.GetUserId(this.User);
 
             List<PropertyViewModel> propertyViewModels = new List<PropertyViewModel>();
 
@@ -61,6 +56,20 @@ namespace Lares.Controllers
 
                 // Add object to the list of items
                 propertyViewModels.Add(tmpProperty);
+            }
+
+            if (TempData["Message"] != null)
+            {
+                if(TempData["MessageType"] == null)
+                {
+                    ViewBag.MessageType = "alert";
+                }
+                else
+                {
+                    ViewBag.MessageType = TempData["MessageType"];
+                }
+
+                ViewBag.Message = TempData["Message"];
             }
 
             return View(propertyViewModels);
@@ -237,6 +246,29 @@ namespace Lares.Controllers
         }
 
         // TODO: GET: Property/SetCurrent/[id]
+        [Authorize]
+        public async Task<IActionResult> SetCurrent(int id)
+        {
+            var @property = await _context.Property.FindAsync(id);
+            var currentUser = await _userManager.GetUserAsync(this.User);
+            
+            if( currentUser.Properties.Any( prop => prop.Equals(@property) ) )
+            {
+                currentUser.SelectedPropertyId = property.Id;
+                await _userManager.UpdateAsync(currentUser);
+                TempData["MessageType"] = "alert";
+                TempData["Message"] = $"Your current property has changed to {property.Name}.";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                // Property doesn't belong to the owner
+                TempData["MessageType"] = "error";
+                TempData["Message"] = $"The model selected to be default does not belong to the current user.";
+                ModelState.AddModelError("Error", "The model selected to be default does not belong to the current user.");
+                return RedirectToAction(nameof(Index));
+            }
+        }
         
     }
 }
