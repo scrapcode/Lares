@@ -34,5 +34,8 @@ namespace Lares.ViewModels
         [Display(Name = "Date Acquired")]
         [DataType(DataType.Date)]
         public DateTime AcquiredDate { get; set; }
+
+        [Display(Name = "Set as Current Property?")]
+        public bool SetAsCurrentProp { get; set; }
     }
 }

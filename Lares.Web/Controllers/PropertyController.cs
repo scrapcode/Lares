@@ -105,16 +105,20 @@ namespace Lares.Controllers
             // Set the default AcquiredDate to DateTime.Now
             propertyViewModel.AcquiredDate = DateTime.Now;
 
+            // Have "Set as Current Property" checked by default.
+            propertyViewModel.SetAsCurrentProp = true;
+
             return View(propertyViewModel);
         }
 
         // POST: Property/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate,Id")] PropertyViewModel propertyViewModel)
+        public async Task<IActionResult> Create([Bind("OwnerUserId,Name,Description,Address1,Address2,AcquiredDate,Id,SetAsCurrentProp")] PropertyViewModel propertyViewModel)
         {
             if (ModelState.IsValid)
             {
+                // Retrieve the User object for the selected Owner of this property.
                 var ownerUser = _userManager.Users.FirstOrDefault(u => u.Id == propertyViewModel.OwnerUserId);
 
                 if (ownerUser == null) return NotFound();
@@ -133,6 +137,13 @@ namespace Lares.Controllers
 
                 _context.Add(newProperty);
                 await _context.SaveChangesAsync();
+
+                // Redirect to set as user's current property, if that choice was selected.
+                if (propertyViewModel.SetAsCurrentProp)
+                {
+                    return RedirectToAction(nameof(SetCurrent), new { Id = newProperty.Id });
+                }    
+
                 return RedirectToAction(nameof(Index));
             }
             return View(propertyViewModel);
@@ -146,6 +157,8 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
+            // Must use '@' in front of the word 'property' so that
+            // it is not seen by the compiler as a keyword.
             var @property = await _context.Property.FindAsync(id);
             if (@property == null)
             {
@@ -252,18 +265,23 @@ namespace Lares.Controllers
             var @property = await _context.Property.FindAsync(id);
             var currentUser = await _userManager.GetUserAsync(this.User);
             
+            if (@property == null)
+            {
+                return NotFound();
+            }
+
             if( currentUser.Properties.Any( prop => prop.Equals(@property) ) )
             {
                 currentUser.SelectedPropertyId = property.Id;
                 await _userManager.UpdateAsync(currentUser);
-                TempData["MessageType"] = "alert";
+                TempData["MessageType"] = "success";
                 TempData["Message"] = $"Your current property has changed to {property.Name}.";
                 return RedirectToAction(nameof(Index));
             }
             else
             {
                 // Property doesn't belong to the owner
-                TempData["MessageType"] = "error";
+                TempData["MessageType"] = "danger";
                 TempData["Message"] = $"The model selected to be default does not belong to the current user.";
                 ModelState.AddModelError("Error", "The model selected to be default does not belong to the current user.");
                 return RedirectToAction(nameof(Index));

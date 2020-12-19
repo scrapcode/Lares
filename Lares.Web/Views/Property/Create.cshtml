@@ -45,6 +45,11 @@
                 <span asp-validation-for="AcquiredDate" class="text-danger"></span>
             </div>
             <div class="form-group">
+                <label asp-for="SetAsCurrentProp" class="control-label"></label>
+                <input asp-for="SetAsCurrentProp" class="form-control" />
+                <span asp-validation-for="SetAsCurrentProp" class="text-danger"></span>
+            </div>
+            <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>
         </form>
