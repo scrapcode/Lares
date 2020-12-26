@@ -90,7 +90,25 @@ namespace Lares.Controllers
                 return NotFound();
             }
 
-            return View(@property);
+            // retrieve all assets assigned to the selected property
+            List<Asset> propertyAssets = _context.Assets
+                                         .Where(a => a.PropertyId == property.Id)
+                                         .ToList();
+
+            // create the property viewmodel
+            PropertyViewModel propertyViewModel = new PropertyViewModel
+            {
+                Id = property.Id,
+                OwnerUserId = property.OwnerUserId,
+                Name = property.Name,
+                Description = property.Description,
+                Address1 = property.Address1,
+                Address2 = property.Address2,
+                AcquiredDate = property.AcquiredDate,
+                Assets = propertyAssets
+            };
+
+            return View(propertyViewModel);
         }
 
         // GET: Property/Create

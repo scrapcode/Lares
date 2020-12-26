@@ -1,54 +1,54 @@
-﻿@model Lares.Entities.Property
+﻿@model Lares.ViewModels.PropertyViewModel
 
 @{
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
-
 <div>
-    <h4>Property</h4>
+    <h4><a asp-action="Index">Properties</a> > @Html.DisplayFor(model => model.Name)</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.OwnerUserId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.OwnerUserId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Name)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Name)
-        </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Description)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Description)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Address1)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Address1)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Address2)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.Address2)
         </dd>
-        <dt class = "col-sm-2">
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.AcquiredDate)
         </dt>
-        <dd class = "col-sm-10">
+        <dd class="col-sm-10">
             @Html.DisplayFor(model => model.AcquiredDate)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Assets)
+        </dt>
+        <dd class="col-sm-10">
+            <ul>
+            @foreach(var asset in Model.Assets)
+            {
+                <li><a asp-controller="Asset" asp-action="Details" asp-route-id="@asset.Id">@asset.Name</a></li>
+            }
+            </ul>
         </dd>
     </dl>
 </div>
 <div>
-    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="btn-group">
+        <a asp-action="SetDefault" asp-route-id="@Model.Id" class="btn btn-primary">Set As Default</a>
+        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-secondary">Edit</a>
+        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-danger">Delete</a>
+    </div>
 </div>

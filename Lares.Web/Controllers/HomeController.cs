@@ -20,11 +20,12 @@ namespace Lares.Controllers
 
         public IActionResult Index()
         {
-            return View();
-        }
+            // redirect to Dashboard if user is logged in.
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction("Index", "Dashboard");
+            }
 
-        public IActionResult Privacy()
-        {
             return View();
         }
 

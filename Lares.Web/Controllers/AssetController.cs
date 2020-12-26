@@ -7,16 +7,21 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Lares.Entities;
 using Lares.Infrastructure;
+using Microsoft.AspNetCore.Authorization;
+using Lares.ViewModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace Lares.Controllers
 {
     public class AssetController : Controller
     {
         private readonly DataContext _context;
+        private readonly UserManager<User> _userManager;
 
-        public AssetController(DataContext context)
+        public AssetController(DataContext context, UserManager<User> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Asset
@@ -46,10 +51,12 @@ namespace Lares.Controllers
         }
 
         // GET: Asset/Create
+        [Authorize]
         public IActionResult Create()
         {
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id");
-            return View();
+            AssetViewModel assetViewModel = new AssetViewModel();
+
+            return View(assetViewModel);
         }
 
         // POST: Asset/Create
@@ -57,16 +64,31 @@ namespace Lares.Controllers
         // more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("PropertyId,Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] Asset asset)
+        [Authorize]
+        public async Task<IActionResult> Create([Bind("Name,Description,Make,Model,SerialNo,AcquiredDate,Id")] AssetViewModel assetViewModel)
         {
+            // get users's current property 
+            var currentUser = await _userManager.GetUserAsync(this.User);
+            var currentProperty = currentUser.SelectedPropertyId;
+
+            Asset newAsset = new Asset
+            {
+                PropertyId = currentProperty,
+                Name = assetViewModel.Name,
+                Description = assetViewModel.Description,
+                Make = assetViewModel.Make,
+                Model = assetViewModel.Model,
+                SerialNo = assetViewModel.SerialNo,
+                AcquiredDate = assetViewModel.AcquiredDate
+            };
+
             if (ModelState.IsValid)
             {
-                _context.Add(asset);
+                _context.Add(newAsset);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["PropertyId"] = new SelectList(_context.Property, "Id", "Id", asset.PropertyId);
-            return View(asset);
+            return View(newAsset);
         }
 
         // GET: Asset/Edit/5

@@ -9,11 +9,11 @@
         <h1>Dashboard</h1>
         @if (Model.CurrentProperty == null)
         {
-            <p>You do not have a property selected. [insert property options]</p>
+            <p>You do not have a property selected. [<a asp-controller="Property" asp-action="Index">Manage Properties</a>]</p>
         }
         else
         {
-            <p>Your current property is: @Model.CurrentProperty.Name!</p>
+            <p>Your current property is: <a asp-controller="Property" asp-action="Details" asp-route-id="@Model.CurrentProperty.Id">@Model.CurrentProperty.Name</a> [<a asp-controller="Property" asp-action="Index">Manage Properties</a>]  </p>
         }
     </div>
 </div>
@@ -40,7 +40,7 @@
             </div>
             <div class="card-body">
                 <p class="card-text">
-                    <a href="#">Add Asset</a>
+                    <a asp-controller="Asset" asp-action="Create">Add Asset</a><br />
                     <a href="#">Generate Reports</a>
                 </p>
             </div>

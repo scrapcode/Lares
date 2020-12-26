@@ -18,56 +18,24 @@
 <p>
     <a asp-action="Create">Create New</a>
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th></th>
-            <th>
-                @Html.DisplayNameFor(model => model.Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Description)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address1)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Address2)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.AcquiredDate)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
+
+<div class="row">
+    <div class="card-deck">
+        @foreach (var prop in Model)
         {
-            <tr>
-                <td>
-                    <a asp-action="SetCurrent" asp-route-id="@item.Id">Set as Current</a>
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Name)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Description)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Address1)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.Address2)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.AcquiredDate)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-                </td>
-            </tr>
+            <div class="card">
+                <!-- Hide images for now: -->
+                <!--
+                    <img class="card-img-top" src="..." alt="Image of @prop.Name">
+                -->
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <a asp-controller="Property" asp-action="Details" asp-route-id="@prop.Id">@Html.DisplayFor(modelItem => prop.Name)</a>
+                    </h5>
+                    <p class="card-text">@Html.DisplayFor(modelItem => prop.Description)</p>
+                    <a asp-action="SetCurrent" asp-route-id="@prop.Id" class="btn btn-primary">Set Current</a>
+                </div>
+            </div>
         }
-    </tbody>
-</table>
+    </div>
+</div>

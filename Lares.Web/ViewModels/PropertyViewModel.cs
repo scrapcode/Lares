@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 using Lares.Entities;
+using System.Collections.Generic;
 
 namespace Lares.ViewModels
 {
@@ -34,6 +35,8 @@ namespace Lares.ViewModels
         [Display(Name = "Date Acquired")]
         [DataType(DataType.Date)]
         public DateTime AcquiredDate { get; set; }
+
+        public List<Asset> Assets { get; set; }
 
         [Display(Name = "Set as Current Property?")]
         public bool SetAsCurrentProp { get; set; }
